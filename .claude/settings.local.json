@@ -1,7 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -c ':*)"
+      "Bash(python -c ':*)",
+      "Read(//c/Users/nicol/.claude/plugins/**)",
+      "Bash(npx --version)",
+      "Bash(streamlit run:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8501)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_tabs"
     ]
+  },
+  "mcpServers": {
+    "playwright": {
+      "command": "playwright-mcp"
+    }
   }
 }

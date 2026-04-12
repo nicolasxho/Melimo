@@ -82,15 +82,35 @@ def select_words(
             "dictionary", "cache.json"
         )
 
-    # Étape 1 : récupérer les définitions pour un pool de candidats
-    # Utiliser la forme originale (avec accents) pour le Wiktionnaire
-    pool = random.sample(word_list, min(n_words * 6, len(word_list)))
-    # defs : mot_normalisé → définition
+    # Étape 1 : récupérer les définitions pour un pool de candidats.
+    # On charge le cache une seule fois et on priorise les mots déjà en cache
+    # pour éviter des dizaines de requêtes réseau.
+    from dictionary.wiktionary import load_cache_once
+    cache = load_cache_once(cache_path)
+
+    cached_words = [(n, o) for n, o in word_list if o.upper() in cache or n in cache]
+    uncached_words = [(n, o) for n, o in word_list if o.upper() not in cache and n not in cache]
+    random.shuffle(cached_words)
+    random.shuffle(uncached_words)
+
+    # Priorité aux mots en cache ; compléter avec des requêtes réseau si besoin
+    pool = cached_words[:n_words * 4] + uncached_words[:n_words * 2]
+    pool = pool[:min(n_words * 6, len(word_list))]
+
     defs: dict[str, str] = {}
     for normalized, original in pool:
-        defn = fetch_and_cache(original, cache_path)
-        if defn:
-            defs[normalized] = defn
+        key = original.upper()
+        if key in cache:
+            defs[normalized] = cache[key]
+        elif normalized in cache:
+            defs[normalized] = cache[normalized]
+        else:
+            defn = fetch_and_cache(original, cache_path)
+            if defn:
+                cache[original.upper()] = defn
+                defs[normalized] = defn
+        if len(defs) >= n_words * 3:
+            break  # Pool suffisant, pas besoin d'aller plus loin
 
     if len(defs) < n_words:
         raise ValueError(

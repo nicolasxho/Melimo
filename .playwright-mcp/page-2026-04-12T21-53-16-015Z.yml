@@ -1,0 +1,104 @@
+- generic [active]:
+  - generic:
+    - generic:
+      - generic [ref=e3]:
+        - banner [ref=e6]:
+          - generic [ref=e9]:
+            - button "Deploy" [ref=e11] [cursor=pointer]:
+              - generic [ref=e13]: Deploy
+            - button "Main menu" [ref=e15] [cursor=pointer]:
+              - img [ref=e16]
+        - generic [ref=e19]:
+          - heading "PARTIE TERMINÉE" [level=2] [ref=e362]:
+            - text: PARTIE TERMINÉE
+            - generic [ref=e363]:
+              - link "Link to heading":
+                - /url: "#partie-terminee"
+                - img
+          - generic [ref=e365]:
+            - generic [ref=e370]:
+              - paragraph [ref=e373]: Score
+              - paragraph [ref=e376]: 6 pts
+            - generic [ref=e381]:
+              - paragraph [ref=e384]: Mots trouvés
+              - paragraph [ref=e387]: 6/6
+            - generic [ref=e392]:
+              - paragraph [ref=e395]: Réussite
+              - paragraph [ref=e398]: 100%
+          - alert [ref=e401]:
+            - generic [ref=e404]:
+              - generic [ref=e407]: 🏆
+              - paragraph [ref=e409]: Parfait ! Tous les mots trouvés !
+          - separator [ref=e414]
+          - heading "Récapitulatif" [level=4] [ref=e420]:
+            - text: Récapitulatif
+            - generic [ref=e421]:
+              - link "Link to heading":
+                - /url: "#recapitulatif"
+                - img
+          - table [ref=e426]:
+            - rowgroup [ref=e427]:
+              - row "# Réponse Définition" [ref=e428]:
+                - columnheader "#" [ref=e429]
+                - columnheader "Réponse" [ref=e430]
+                - columnheader "Définition" [ref=e431]
+            - rowgroup [ref=e432]:
+              - row "1 LUNE Satellite naturel de la Terre" [ref=e433]:
+                - cell "1" [ref=e434]
+                - cell "LUNE" [ref=e435]
+                - cell "Satellite naturel de la Terre" [ref=e436]
+              - row "2 ETOILE Astre lumineux dans le ciel nocturne" [ref=e437]:
+                - cell "2" [ref=e438]
+                - cell "ETOILE" [ref=e439]
+                - cell "Astre lumineux dans le ciel nocturne" [ref=e440]
+              - row "3 SOLEIL Notre étoile, centre du système solaire" [ref=e441]:
+                - cell "3" [ref=e442]
+                - cell "SOLEIL" [ref=e443]
+                - cell "Notre étoile, centre du système solaire" [ref=e444]
+              - row "4 OISEAU Animal à plumes qui vole" [ref=e445]:
+                - cell "4" [ref=e446]
+                - cell "OISEAU" [ref=e447]
+                - cell "Animal à plumes qui vole" [ref=e448]
+              - row "5 NUAGE Amas de vapeur d'eau dans le ciel" [ref=e449]:
+                - cell "5" [ref=e450]
+                - cell "NUAGE" [ref=e451]
+                - cell "Amas de vapeur d'eau dans le ciel" [ref=e452]
+              - row "6 ★ FLUTE Instrument à vent de la famille des bois" [ref=e453]:
+                - cell "6 ★" [ref=e454]
+                - cell "FLUTE" [ref=e455]
+                - cell "Instrument à vent de la famille des bois" [ref=e456]
+          - separator [ref=e461]
+          - button "🔄 Rejouer" [ref=e464] [cursor=pointer]:
+            - paragraph [ref=e468]: 🔄 Rejouer
+      - generic:
+        - generic:
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img
+          - img

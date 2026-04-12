@@ -1,0 +1,26 @@
+- generic [ref=e3]:
+  - banner [ref=e6]:
+    - generic [ref=e9]:
+      - button "Deploy" [ref=e11] [cursor=pointer]:
+        - generic [ref=e13]: Deploy
+      - button "Main menu" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+  - generic [ref=e19]:
+    - heading "📂 Choisir un puzzle" [level=3] [ref=e58]:
+      - text: 📂 Choisir un puzzle
+      - generic [ref=e59]:
+        - link "Link to heading":
+          - /url: "#choisir-un-puzzle"
+          - img
+    - generic [ref=e61]:
+      - paragraph [ref=e65]: Puzzle
+      - generic [ref=e67]:
+        - generic [ref=e68]:
+          - generic [ref=e69]: puzzle demo
+          - combobox "Selected puzzle demo. Puzzle" [ref=e71]
+        - img "open" [ref=e73]
+    - button "▶ Jouer" [ref=e77] [cursor=pointer]:
+      - paragraph [ref=e81]: ▶ Jouer
+    - separator [ref=e86]
+    - button "← Retour" [ref=e89] [cursor=pointer]:
+      - paragraph [ref=e93]: ← Retour

@@ -1,0 +1,47 @@
+- generic [ref=e3]:
+  - banner [ref=e6]:
+    - generic [ref=e9]:
+      - button "Deploy" [ref=e11] [cursor=pointer]:
+        - generic [ref=e13]: Deploy
+      - button "Main menu" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+  - generic [ref=e19]:
+    - heading "⚙️ Nouvelle partie" [level=3] [ref=e58]:
+      - text: ⚙️ Nouvelle partie
+      - generic [ref=e59]:
+        - link "Link to heading":
+          - /url: "#nouvelle-partie"
+          - img
+    - generic [ref=e61]:
+      - paragraph [ref=e65]: Thème
+      - generic [ref=e67]:
+        - generic [ref=e68]:
+          - generic [ref=e69]: General
+          - combobox "Selected General. Thème" [ref=e71]
+        - img "open" [ref=e73]
+    - generic [ref=e76]:
+      - paragraph [ref=e80]: Difficulté
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - generic [ref=e84]: Facile
+          - combobox "Selected Facile. Difficulté" [ref=e86]
+        - img "open" [ref=e88]
+    - generic [ref=e91]:
+      - paragraph [ref=e95]: Taille de la grille
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e99]: Petite (10×10)
+          - combobox "Selected Petite (10×10). Taille de la grille" [ref=e101]
+        - img "open" [ref=e103]
+    - generic [ref=e106]:
+      - paragraph [ref=e110]: Nombre de mots
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e114]: "12"
+          - combobox "Selected 12. Nombre de mots" [ref=e116]
+        - img "open" [ref=e118]
+    - button "🎲 Générer" [ref=e122] [cursor=pointer]:
+      - paragraph [ref=e126]: 🎲 Générer
+    - separator [ref=e131]
+    - button "← Retour" [ref=e134] [cursor=pointer]:
+      - paragraph [ref=e138]: ← Retour

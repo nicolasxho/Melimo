@@ -1,0 +1,116 @@
+- generic [ref=e3]:
+  - banner [ref=e6]:
+    - generic [ref=e9]:
+      - button "Deploy" [ref=e11] [cursor=pointer]:
+        - generic [ref=e13]: Deploy
+      - button "Main menu" [ref=e15] [cursor=pointer]:
+        - img [ref=e16]
+  - generic [ref=e19]:
+    - heading "Mélimo — Demo No 1" [level=3] [ref=e94]:
+      - text: Mélimo — Demo No 1
+      - generic [ref=e59]:
+        - link "Link to heading":
+          - /url: "#choisir-un-puzzle"
+          - img
+    - generic [ref=e96]:
+      - paragraph [ref=e99]: 2/6 mots trouvés
+      - progressbar "33% Loaded" [ref=e250]
+    - generic [ref=e105]:
+      - table [ref=e113]:
+        - rowgroup [ref=e114]:
+          - row "1 2 3 4 5 6 7 8" [ref=e115]:
+            - cell [ref=e116]
+            - cell "1" [ref=e117]
+            - cell "2" [ref=e118]
+            - cell "3" [ref=e119]
+            - cell "4" [ref=e120]
+            - cell "5" [ref=e121]
+            - cell "6" [ref=e122]
+            - cell "7" [ref=e123]
+            - cell "8" [ref=e124]
+          - row "a L U N E E T O I" [ref=e125]:
+            - cell "a" [ref=e126]
+            - cell "L" [ref=e127]
+            - cell "U" [ref=e128]
+            - cell "N" [ref=e129]
+            - cell "E" [ref=e130]
+            - cell "E" [ref=e131]
+            - cell "T" [ref=e132]
+            - cell "O" [ref=e133]
+            - cell "I" [ref=e134]
+          - row "b L I E L O S E L" [ref=e135]:
+            - cell "b" [ref=e136]
+            - cell "L" [ref=e137]
+            - cell "I" [ref=e138]
+            - cell "E" [ref=e139]
+            - cell "L" [ref=e140]
+            - cell "O" [ref=e141]
+            - cell "S" [ref=e142]
+            - cell "E" [ref=e143]
+            - cell "L" [ref=e144]
+          - row "c O I S E A U N U" [ref=e145]:
+            - cell "c" [ref=e146]
+            - cell "O" [ref=e147]
+            - cell "I" [ref=e148]
+            - cell "S" [ref=e149]
+            - cell "E" [ref=e150]
+            - cell "A" [ref=e151]
+            - cell "U" [ref=e152]
+            - cell "N" [ref=e153]
+            - cell "U" [ref=e154]
+          - row "d E T U L F E G A" [ref=e155]:
+            - cell "d" [ref=e156]
+            - cell "E" [ref=e157]
+            - cell "T" [ref=e158]
+            - cell "U" [ref=e159]
+            - cell "L" [ref=e160]
+            - cell "F" [ref=e161]
+            - cell "E" [ref=e162]
+            - cell "G" [ref=e163]
+            - cell "A" [ref=e164]
+      - generic [ref=e166]:
+        - generic [ref=e169]:
+          - paragraph [ref=e172]: Score
+          - paragraph [ref=e175]: 1 pt
+        - table [ref=e180]:
+          - rowgroup [ref=e181]:
+            - row "1. LUNE Satellite naturel de la Terre" [ref=e182]:
+              - cell "1." [ref=e183]
+              - cell "LUNE" [ref=e184]
+              - cell "Satellite naturel de la Terre" [ref=e185]
+            - row "2. ETOILE Astre lumineux dans le ciel nocturne" [ref=e251]:
+              - cell "2." [ref=e187]
+              - cell "ETOILE" [ref=e252]
+              - cell "Astre lumineux dans le ciel nocturne" [ref=e189]
+            - row "3. _ _ _ _ _ _ Notre étoile, centre du système solaire" [ref=e190]:
+              - cell "3." [ref=e191]
+              - cell "_ _ _ _ _ _" [ref=e192]
+              - cell "Notre étoile, centre du système solaire" [ref=e193]
+            - row "4. _ _ _ _ _ _ Animal à plumes qui vole" [ref=e194]:
+              - cell "4." [ref=e195]
+              - cell "_ _ _ _ _ _" [ref=e196]
+              - cell "Animal à plumes qui vole" [ref=e197]
+            - row "5. _ _ _ _ _ Amas de vapeur d'eau dans le ciel" [ref=e198]:
+              - cell "5." [ref=e199]
+              - cell "_ _ _ _ _" [ref=e200]
+              - cell "Amas de vapeur d'eau dans le ciel" [ref=e201]
+            - row "6. _ _ _ _ _ Instrument à vent de la famille des bois ★ MOT MYSTÈRE" [ref=e202]:
+              - cell "6." [ref=e203]
+              - cell "_ _ _ _ _" [ref=e204]
+              - cell "Instrument à vent de la famille des bois ★ MOT MYSTÈRE" [ref=e205]
+        - separator [ref=e210]
+        - alert [ref=e255]:
+          - paragraph [ref=e260]:
+            - text: ✓ Correct !
+            - strong [ref=e261]: ETOILE
+        - generic [ref=e263]:
+          - paragraph [ref=e267]: Mot 3
+          - textbox "Mot 3" [ref=e270]:
+            - /placeholder: ""
+        - generic [ref=e272]:
+          - button "✓ Valider" [ref=e277] [cursor=pointer]:
+            - paragraph [ref=e281]: ✓ Valider
+          - button "💡 Indice" [ref=e286] [cursor=pointer]:
+            - paragraph [ref=e290]: 💡 Indice
+          - button "🚪 Quitter" [ref=e295] [cursor=pointer]:
+            - paragraph [ref=e299]: 🚪 Quitter

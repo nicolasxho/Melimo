@@ -135,6 +135,14 @@ def fetch_and_cache(word: str, cache_path: str = CACHE_PATH) -> str | None:
     return definition
 
 
+def load_cache_once(cache_path: str = CACHE_PATH) -> dict[str, str]:
+    """Charge le cache depuis un chemin donné (ou le chemin par défaut)."""
+    if os.path.exists(cache_path):
+        with open(cache_path, encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
 def get_cached_words() -> dict[str, str]:
     """Retourne tous les mots en cache."""
     return _load_cache()
