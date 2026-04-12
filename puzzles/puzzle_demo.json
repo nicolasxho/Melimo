@@ -1,0 +1,66 @@
+{
+  "title": "Mélimo — Demo No 1",
+  "theme": null,
+  "rows": 4,
+  "cols": 8,
+  "grid": [
+    "LUNEETOI",
+    "LIELOSEL",
+    "OISEAUNU",
+    "ETULFEGA"
+  ],
+  "path": [
+    ["a", 1], ["a", 2], ["a", 3], ["a", 4],
+    ["a", 5], ["a", 6], ["a", 7], ["a", 8],
+    ["b", 8], ["b", 7],
+    ["b", 6], ["b", 5], ["b", 4], ["b", 3], ["b", 2], ["b", 1],
+    ["c", 1], ["c", 2], ["c", 3], ["c", 4], ["c", 5], ["c", 6],
+    ["c", 7], ["c", 8],
+    ["d", 8], ["d", 7], ["d", 6],
+    ["d", 5], ["d", 4], ["d", 3], ["d", 2], ["d", 1]
+  ],
+  "words": [
+    {
+      "number": 1,
+      "definition": "Satellite naturel de la Terre",
+      "answer": "LUNE",
+      "letter_count_hint": null,
+      "is_mystery": false
+    },
+    {
+      "number": 2,
+      "definition": "Astre lumineux dans le ciel nocturne",
+      "answer": "ETOILE",
+      "letter_count_hint": null,
+      "is_mystery": false
+    },
+    {
+      "number": 3,
+      "definition": "Notre étoile, centre du système solaire",
+      "answer": "SOLEIL",
+      "letter_count_hint": null,
+      "is_mystery": false
+    },
+    {
+      "number": 4,
+      "definition": "Animal à plumes qui vole",
+      "answer": "OISEAU",
+      "letter_count_hint": null,
+      "is_mystery": false
+    },
+    {
+      "number": 5,
+      "definition": "Amas de vapeur d'eau dans le ciel",
+      "answer": "NUAGE",
+      "letter_count_hint": null,
+      "is_mystery": false
+    },
+    {
+      "number": 6,
+      "definition": "Instrument à vent de la famille des bois",
+      "answer": "FLUTE",
+      "letter_count_hint": 5,
+      "is_mystery": true
+    }
+  ]
+}
