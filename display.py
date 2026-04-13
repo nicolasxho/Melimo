@@ -216,11 +216,14 @@ def print_correct(
     print()
 
 
-def print_wrong(player_input: str, word: WordEntry) -> None:
+def print_wrong(player_input: str, word: WordEntry, all_attempts: list[str] | None = None) -> None:
     import scoring as _scoring
     print()
     print(f"  {_red('✗ Mauvaise réponse.')}  Vous avez saisi : {_bold(player_input.upper())}")
     print(f"  Pénalité : {_red(f'-{_scoring.ERROR_PENALTY} pts')}")
+    if all_attempts and len(all_attempts) > 1:
+        attempts_str = "  ·  ".join(_dim(a) for a in all_attempts[-5:])
+        print(f"  Essais : {attempts_str}")
     print()
 
 

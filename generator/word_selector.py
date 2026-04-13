@@ -116,6 +116,18 @@ def select_words(
         if len(defs) >= n_words * 3:
             break  # Pool suffisant, pas besoin d'aller plus loin
 
+    # Fallback : si le Wiktionnaire est inaccessible, utiliser une définition générique
+    # pour les mots sans définition afin de ne pas bloquer la génération.
+    if len(defs) < n_words:
+        for normalized, original in pool:
+            if normalized not in defs:
+                defs[normalized] = (
+                    f"Mot de la langue française ({len(normalized)} lettres)",
+                    f"Mot de la langue française ({len(normalized)} lettres)",
+                )
+            if len(defs) >= n_words * 3:
+                break
+
     if len(defs) < n_words:
         raise ValueError(
             f"Seulement {len(defs)} mot(s) avec une définition disponible "

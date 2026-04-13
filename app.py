@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import streamlit as st
 
 from streamlit_app.state import init_state
-from streamlit_app.views import home, setup_predefined, setup_generate, game, summary
+from streamlit_app.views import home, setup_predefined, setup_generate, game, summary, rules
 
 st.set_page_config(
     page_title="Mélimo",
@@ -35,6 +35,8 @@ elif screen == "game":
     game.render()
 elif screen == "summary":
     summary.render()
+elif screen == "rules":
+    rules.render()
 else:
     st.session_state.screen = "home"
     st.rerun()

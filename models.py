@@ -83,7 +83,8 @@ class GameState:
     errors: dict[int, int] = field(default_factory=dict)          # numéro → nb d'erreurs
     hints: dict[int, int] = field(default_factory=dict)           # numéro → nb d'indices
     word_start_times: dict[int, float] = field(default_factory=dict)   # numéro → timestamp de début
-    word_elapsed: dict[int, float] = field(default_factory=dict)  # numéro → secondes écoulées (enregistré à la validation)
+    word_elapsed: dict[int, float] = field(default_factory=dict)       # numéro → secondes écoulées (enregistré à la validation)
+    attempts: dict[int, list[str]] = field(default_factory=dict)       # numéro → liste des saisies incorrectes
 
     def is_word_correct(self, word_number: int) -> bool:
         from validation import check_answer

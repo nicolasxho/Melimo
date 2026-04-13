@@ -75,13 +75,14 @@ def render() -> None:
     current_word = puzzle.words[idx] if not game_complete else None
     current_word_num = current_word.number if current_word else None
 
-    # Initialiser le chronomètre dès qu'on arrive sur un nouveau mot
+    # Initialiser le chronomètre et les compteurs dès qu'on arrive sur un nouveau mot
     if current_word is not None:
         if st.session_state.word_start_time is None:
             st.session_state.word_start_time = time.time()
             state.word_start_times[current_word.number] = st.session_state.word_start_time
             state.errors[current_word.number] = 0
             state.hints[current_word.number] = 0
+            state.attempts[current_word.number] = []
 
     # Dernière lettre du dernier mot trouvé (repère de départ pour le joueur)
     start_hint_cell: Cell | None = None
@@ -90,7 +91,7 @@ def render() -> None:
         if state.is_word_correct(prev_word.number) and prev_word.end_index > 0:
             start_hint_cell = puzzle.path[prev_word.end_index - 1]
 
-    # ── Titre + progression ───────────────────────────────────────────────────
+    # ── Titre + timer + progression ───────────────────────────────────────────
     title_col, timer_col = st.columns([4, 1])
     with title_col:
         st.markdown(
@@ -101,8 +102,8 @@ def render() -> None:
         if remaining is not None:
             color = "#f44336" if remaining < 60 else "#ff9800" if remaining < 120 else "#4caf50"
             st.markdown(
-                f"<div style='text-align:right; font-size:1.4rem; font-weight:bold; color:{color}; padding-top:8px;'>"
-                f"⏱ {_fmt_time(remaining)}</div>",
+                f"<div style='text-align:right; font-size:1.4rem; font-weight:bold;"
+                f" color:{color}; padding-top:8px;'>⏱ {_fmt_time(remaining)}</div>",
                 unsafe_allow_html=True,
             )
 
@@ -166,7 +167,6 @@ def render() -> None:
             answer_key = f"answer_{st.session_state.answer_input_key}"
             hints_used = state.hints.get(current_word.number, 0)
             next_cost = scoring.hint_next_cost(hints_used)
-            next_label = scoring.hint_next_label(hints_used)
 
             with st.form(key="answer_form", clear_on_submit=True):
                 user_input = st.text_input(prompt, key=answer_key)
@@ -183,10 +183,18 @@ def render() -> None:
                 with fc3:
                     reveal_clicked = st.form_submit_button("👁 Révéler (0 pt)", use_container_width=True)
                 with fc4:
-                    quit_clicked = st.form_submit_button("🚪 Quitter", use_container_width=True)
+                    quit_label = "⚠️ Confirmer ?" if st.session_state.confirm_quit else "🚪 Quitter"
+                    quit_clicked = st.form_submit_button(quit_label, use_container_width=True)
+
+            # ── Historique des tentatives ─────────────────────────────────────
+            prev_attempts = state.attempts.get(current_word.number, [])
+            if prev_attempts:
+                attempts_str = "  ·  ".join(f"~~{a}~~" for a in prev_attempts[-5:])
+                st.caption(f"Essais précédents : {attempts_str}")
 
             # ── Traitement des actions ────────────────────────────────────────
             if submitted and user_input.strip():
+                st.session_state.confirm_quit = False
                 if check_answer(user_input, current_word):
                     state.answers[current_word.number] = current_word.answer
                     elapsed = _elapsed_now(current_word.number, state)
@@ -211,11 +219,13 @@ def render() -> None:
                     st.session_state.current_word_idx = idx + 1
                 else:
                     state.errors[current_word.number] = state.errors.get(current_word.number, 0) + 1
+                    attempts = state.attempts.setdefault(current_word.number, [])
+                    attempts.append(user_input.strip().upper())
                     st.session_state.last_feedback = {"kind": "wrong", "word": current_word}
                 st.rerun()
 
             if hint_clicked and next_cost is not None:
-                # P0.2 — garde : n'appliquer que si le mot n'est pas encore trouvé
+                st.session_state.confirm_quit = False
                 if not state.is_word_correct(current_word.number):
                     new_level = hints_used + 1
                     state.hints[current_word.number] = new_level
@@ -229,6 +239,7 @@ def render() -> None:
                     st.rerun()
 
             if reveal_clicked:
+                st.session_state.confirm_quit = False
                 state.revealed.add(current_word.number)
                 state.answers[current_word.number] = current_word.answer
                 elapsed = _elapsed_now(current_word.number, state)
@@ -241,14 +252,26 @@ def render() -> None:
                 st.rerun()
 
             if quit_clicked:
-                st.session_state.screen = "summary"
-                st.rerun()
+                if st.session_state.confirm_quit:
+                    # Deuxième clic → on quitte vraiment
+                    st.session_state.confirm_quit = False
+                    st.session_state.screen = "summary"
+                    st.rerun()
+                else:
+                    # Premier clic → demande confirmation
+                    st.session_state.confirm_quit = True
+                    st.rerun()
 
-    # ── Panneau droit : score + indices révélés + score potentiel ────────────
+        # Annuler la confirmation si le joueur fait autre chose
+        if not game_complete and current_word is not None:
+            if st.session_state.confirm_quit:
+                st.warning("Clique à nouveau sur **⚠️ Confirmer ?** pour abandonner la partie, ou joue pour annuler.")
+
+    # ── Panneau droit : score + score potentiel + indices révélés ────────────
     with col_play:
         st.metric("Score", f"{state.score} pt{'s' if state.score > 1 else ''}")
 
-        # Score potentiel en temps réel (P1.3)
+        # Score potentiel en temps réel
         if current_word is not None and not game_complete:
             elapsed_now = _elapsed_now(current_word.number, state)
             errors_now = state.errors.get(current_word.number, 0)
@@ -270,7 +293,6 @@ def render() -> None:
 
     # ── Auto-refresh si timer actif ───────────────────────────────────────────
     if remaining is not None:
-        # Rafraîchit la page toutes les 10 s pour mettre à jour le compte à rebours
         st.markdown(
             "<script>setTimeout(function(){window.location.reload()}, 10000);</script>",
             unsafe_allow_html=True,

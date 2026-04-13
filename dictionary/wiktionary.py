@@ -15,15 +15,25 @@ CACHE_PATH = os.path.join(os.path.dirname(__file__), "cache.json")
 WIKTIONARY_API = "https://fr.wiktionary.org/w/api.php"
 USER_AGENT = "Melimo/1.0 (jeu de mots en labyrinthe; python)"
 
+# Cache en mémoire : évite de relire le fichier JSON à chaque appel
+_MEM_CACHE: dict[str, str] | None = None
+
 
 def _load_cache() -> dict[str, str]:
+    global _MEM_CACHE
+    if _MEM_CACHE is not None:
+        return _MEM_CACHE
     if os.path.exists(CACHE_PATH):
         with open(CACHE_PATH, encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+            _MEM_CACHE = json.load(f)
+    else:
+        _MEM_CACHE = {}
+    return _MEM_CACHE
 
 
 def _save_cache(cache: dict[str, str]) -> None:
+    global _MEM_CACHE
+    _MEM_CACHE = cache
     with open(CACHE_PATH, "w", encoding="utf-8") as f:
         json.dump(cache, f, ensure_ascii=False, indent=2)
 
@@ -185,7 +195,9 @@ def _extract_french_definition_raw(word: str) -> tuple[str, str] | None:
 
 
 def load_cache_once(cache_path: str = CACHE_PATH) -> dict[str, str]:
-    """Charge le cache depuis un chemin donné (ou le chemin par défaut)."""
+    """Charge le cache (utilise le cache mémoire si disponible)."""
+    if cache_path == CACHE_PATH:
+        return _load_cache()
     if os.path.exists(cache_path):
         with open(cache_path, encoding="utf-8") as f:
             return json.load(f)

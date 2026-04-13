@@ -20,6 +20,7 @@ def init_state() -> None:
         "word_start_time": None,      # timestamp (float) du début du mot courant
         "game_timer_duration": None,  # durée totale en secondes (None = pas de timer)
         "game_start_time": None,      # timestamp de début de la partie
+        "confirm_quit": False,        # confirmation d'abandon en attente
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -37,6 +38,7 @@ def reset_game() -> None:
     st.session_state.word_start_time = None
     st.session_state.game_timer_duration = None
     st.session_state.game_start_time = None
+    st.session_state.confirm_quit = False
     st.session_state.screen = "home"
 
 

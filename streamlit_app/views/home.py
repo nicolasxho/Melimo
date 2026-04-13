@@ -25,3 +25,8 @@ def render() -> None:
         if st.button("⚙️  Générer une partie", use_container_width=True):
             st.session_state.screen = "setup_generate"
             st.rerun()
+
+    st.markdown("")
+    if st.button("❓  Règles du jeu", use_container_width=True):
+        st.session_state.screen = "rules"
+        st.rerun()

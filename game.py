@@ -34,6 +34,7 @@ def run_game(puzzle: Puzzle) -> None:
         state.word_start_times[word.number] = time.time()
         state.errors[word.number] = 0
         state.hints[word.number] = 0
+        state.attempts[word.number] = []
 
         # Boucle interne : répéter jusqu'à la bonne réponse ou abandon
         while not state.is_word_correct(word.number) and word.number not in state.revealed:
@@ -83,7 +84,8 @@ def run_game(puzzle: Puzzle) -> None:
                 break
             else:
                 state.errors[word.number] = state.errors.get(word.number, 0) + 1
-                display.print_wrong(raw, word)
+                state.attempts.setdefault(word.number, []).append(raw.upper())
+                display.print_wrong(raw, word, state.attempts[word.number])
                 del state.answers[word.number]
                 input("  [Entrée] pour réessayer...")
 

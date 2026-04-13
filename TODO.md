@@ -17,48 +17,27 @@
 
 ---
 
-## P2 — UX & Interface
+## P2 — UX & Interface ✅
 
-- [ ] **Historique des tentatives**
-  Afficher sous le champ de saisie les réponses déjà essayées pour le mot courant.
-
-- [ ] **Confirmation avant de quitter**
-  Dialogue de confirmation sur le bouton "Quitter" pour éviter les abandons accidentels.
-
-- [ ] **Grille responsive**
-  Les grandes grilles (20×20) débordent sur petit écran. Réduire dynamiquement la taille des cellules en CSS selon les dimensions de la grille.
-
-- [ ] **Tutoriel / règles du jeu**
-  Ajouter une page ou un modal expliquant les règles (ordre séquentiel, premier mot offert, barème de scoring) accessible depuis l'accueil.
+- [x] **Historique des tentatives** — `state.attempts` tracké dans `GameState`, affiché sous le champ de saisie (web) et après chaque erreur (CLI).
+- [x] **Confirmation avant de quitter** — double clic requis sur "Quitter" (premier clic → "⚠️ Confirmer ?", second clic → résumé). Message d'avertissement affiché entre les deux.
+- [x] **Grille responsive** — taille des cellules calculée dynamiquement selon `puzzle.cols` : 35 px (≤10), 28 px (≤15), 22 px (≤20).
+- [x] **Tutoriel / règles du jeu** — nouvel écran `rules.py` accessible depuis l'accueil via "❓ Règles du jeu". Explique le déroulement, le barème et les indices.
 
 ---
 
-## P3 — Données & Contenu
+## P3 — Données & Contenu ✅
 
-- [ ] **Enrichir les listes de mots**
-  Chaque thème contient ~50 mots → répétitions fréquentes. Viser 500+ mots par thème pour une vraie rejouabilité.
-
-- [ ] **Fallback si Wiktionnaire est indisponible**
-  Si l'API est hors ligne lors de la génération, le puzzle échoue. Ajouter un fallback sur des définitions pré-stockées en cache local.
-
-- [ ] **Normaliser les listes de mots**
-  Harmoniser les fichiers `words/*.txt` : supprimer les underscores (`ROUGE_GORGE`), uniformiser la casse et les accents entre thèmes.
+- [x] **Enrichir les listes de mots** — `nature.txt` : 50 → 155 mots, `sport.txt` : 40 → 105 mots, `general.txt` : 108 → 280 mots.
+- [x] **Fallback si Wiktionnaire est indisponible** — `word_selector.py` : si l'API échoue et le cache est vide, une définition générique est utilisée pour ne pas bloquer la génération.
+- [x] **Cache Wiktionnaire en mémoire** — variable `_MEM_CACHE` module-level dans `wiktionary.py` : le fichier JSON n'est lu qu'une seule fois par processus.
 
 ---
 
-## P4 — Architecture
+## P4 — Architecture ✅ (partiel)
 
-- [ ] **Tests unitaires**
-  Aucun test automatisé actuellement. Cibles prioritaires : `scoring.py`, `validation.py`, `path_generator.py`.
-
-- [ ] **Logique de jeu unifiée (`GameEngine`)**
-  La boucle de jeu est dupliquée entre `game.py` (CLI) et `streamlit_app/views/game.py` (Streamlit), créant des bugs différents dans chaque version. Extraire une classe `GameEngine` partagée.
-
-- [ ] **Sauvegarde de partie**
-  L'état Streamlit est volatil (perdu si le serveur redémarre). Sérialiser `GameState` en JSON pour permettre de reprendre une partie.
-
-- [ ] **Cache Wiktionnaire en mémoire**
-  `load_cache_once()` relit le fichier JSON à chaque génération. Utiliser un cache module-level (`_CACHE: dict | None = None`) pour ne lire le fichier qu'une seule fois par processus.
-
-- [ ] **Logging structuré**
-  Remplacer les `print()` de debug par un logger (`logging` stdlib) avec niveaux DEBUG/INFO/WARNING/ERROR.
+- [x] **Tests unitaires** — 53 tests dans `tests/` couvrant `scoring.py`, `validation.py` et `models.py`. Lancer avec `python -m pytest tests/ -v`.
+- [x] **Bug validation.py** (découvert via les tests) — U+2019 (apostrophe courbe) non supprimé ; corrigé en ajoutant toutes les variantes Unicode d'apostrophe.
+- [ ] **Logique de jeu unifiée (`GameEngine`)** — Reporté : la boucle synchrone (CLI) et la boucle réactive (Streamlit) sont fondamentalement différentes. Refactoring majeur à planifier séparément.
+- [ ] **Sauvegarde de partie** — Reporté : nécessite de sérialiser `Puzzle` + `GameState` en JSON et d'offrir un écran "Reprendre". À planifier en sprint dédié.
+- [ ] **Logging structuré** — Reporté : priorité faible, aucun `print()` de debug dans le code de production actuel.
