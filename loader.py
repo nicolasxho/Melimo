@@ -131,6 +131,7 @@ def _assign_word_indices(words_raw: list[dict]) -> list[WordEntry]:
             end_index=end,
             letter_count_hint=w.get("letter_count_hint"),
             is_mystery=w.get("is_mystery", False),
+            full_definition=w.get("full_definition"),
         ))
 
         current_index = end
