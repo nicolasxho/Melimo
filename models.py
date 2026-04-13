@@ -76,10 +76,15 @@ class Puzzle:
 @dataclass
 class GameState:
     puzzle: Puzzle
-    answers: dict[int, str] = field(default_factory=dict)   # numéro → réponse joueur
-    revealed: set[int] = field(default_factory=set)         # mots révélés (0 point)
+    answers: dict[int, str] = field(default_factory=dict)        # numéro → réponse joueur
+    revealed: set[int] = field(default_factory=set)              # mots révélés (0 point)
     score: int = 0
     mystery_found: bool = False
+    errors: dict[int, int] = field(default_factory=dict)          # numéro → nb d'erreurs
+    hints: dict[int, int] = field(default_factory=dict)           # numéro → nb d'indices
+    word_start_times: dict[int, float] = field(default_factory=dict)   # numéro → timestamp de début
+    word_elapsed: dict[int, float] = field(default_factory=dict)       # numéro → secondes écoulées (enregistré à la validation)
+    attempts: dict[int, list[str]] = field(default_factory=dict)       # numéro → liste des saisies incorrectes
 
     def is_word_correct(self, word_number: int) -> bool:
         from validation import check_answer
@@ -93,4 +98,8 @@ class GameState:
         return all(w.number in answered for w in self.puzzle.words)
 
     def answered_count(self) -> int:
-        return sum(1 for w in self.puzzle.words if self.is_word_correct(w.number))
+        """Compte les mots trouvés (correctement répondus OU révélés)."""
+        return sum(
+            1 for w in self.puzzle.words
+            if self.is_word_correct(w.number) or w.number in self.revealed
+        )

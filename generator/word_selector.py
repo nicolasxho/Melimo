@@ -93,9 +93,11 @@ def select_words(
     random.shuffle(cached_words)
     random.shuffle(uncached_words)
 
-    # Priorité aux mots en cache ; compléter avec des requêtes réseau si besoin
-    pool = cached_words[:n_words * 4] + uncached_words[:n_words * 2]
-    pool = pool[:min(n_words * 6, len(word_list))]
+    # Priorité aux mots en cache ; limiter les requêtes réseau pour ne pas bloquer l'UI.
+    # Si le cache contient déjà assez de candidats, on évite tout appel réseau.
+    max_uncached = 0 if len(cached_words) >= n_words * 2 else n_words
+    pool = cached_words[:n_words * 4] + uncached_words[:max_uncached]
+    pool = pool[:min(n_words * 5, len(word_list))]
 
     # defs : mot_normalisé → (display_definition, full_definition)
     defs: dict[str, tuple[str, str]] = {}
@@ -113,8 +115,20 @@ def select_words(
             result = fetch_and_cache_full(original, cache_path)
             if result:
                 defs[normalized] = result
-        if len(defs) >= n_words * 3:
+        if len(defs) >= n_words * 2:
             break  # Pool suffisant, pas besoin d'aller plus loin
+
+    # Fallback : si le Wiktionnaire est inaccessible, utiliser une définition générique
+    # pour les mots sans définition afin de ne pas bloquer la génération.
+    if len(defs) < n_words:
+        for normalized, original in pool:
+            if normalized not in defs:
+                defs[normalized] = (
+                    f"Mot de la langue française ({len(normalized)} lettres)",
+                    f"Mot de la langue française ({len(normalized)} lettres)",
+                )
+            if len(defs) >= n_words * 3:
+                break
 
     if len(defs) < n_words:
         raise ValueError(

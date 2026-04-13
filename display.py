@@ -126,7 +126,7 @@ def render_clues(
     print()
 
     # Largeur fixe pour la colonne "réponse/tirets" : longueur du mot le plus long
-    max_len = max(w.length() for w in puzzle.words)
+    max_len = max((w.length() for w in puzzle.words), default=10)
 
     for word in puzzle.words:
         print("  " + _format_clue(word, state, current_word_number, max_len))
@@ -183,23 +183,48 @@ def render_score(state: GameState) -> None:
     progress = f"{correct}/{total}"
     mystery_str = _magenta(" + MOT MYSTÈRE !") if state.mystery_found else ""
 
-    print(f"  Score : {score_str}{mystery_str}   |   Trouvés : {progress}   |   Lettres inutiles : {state.puzzle.unused_count}")
+    total_errors = sum(state.errors.values())
+    total_hints = sum(state.hints.values())
+    err_str = _red(f"  |   Erreurs : {total_errors}") if total_errors else ""
+    hint_str = _yellow(f"  |   Indices : {total_hints}") if total_hints else ""
+
+    print(f"  Score : {score_str}{mystery_str}   |   Trouvés : {progress}{err_str}{hint_str}   |   Lettres inutiles : {state.puzzle.unused_count}")
     print()
 
 
 # ── Affichage d'un résultat ───────────────────────────────────────────────────
 
-def print_correct(word: WordEntry) -> None:
+def print_correct(
+    word: WordEntry,
+    word_score: int,
+    elapsed: int,
+    errors: int,
+    hints: int,
+) -> None:
+    import scoring as _scoring
     print()
-    print(f"  {_green('✓ CORRECT !')}  {_bold(word.answer)}")
     if word.is_mystery:
-        print(f"  {_magenta('🎉 MOT MYSTÈRE découvert ! +1 point bonus !')}")
+        print(f"  {_magenta('🎉 MOT MYSTÈRE !')}  {_bold(word.answer)}  {_green(f'+{word_score} pts')}")
+    else:
+        print(f"  {_green('✓ CORRECT !')}  {_bold(word.answer)}  {_green(f'+{word_score} pts')}")
+    parts: list[str] = [f"⏱ {elapsed}s"]
+    if errors:
+        parts.append(_red(f"✗ {errors} erreur{'s' if errors > 1 else ''} (-{errors * _scoring.ERROR_PENALTY} pts)"))
+    if hints:
+        hp = _scoring.hint_total_penalty(hints)
+        parts.append(_yellow(f"💡 {hints} indice{'s' if hints > 1 else ''} (-{hp} pts)"))
+    print(f"  {' · '.join(parts)}")
     print()
 
 
-def print_wrong(player_input: str, word: WordEntry) -> None:
+def print_wrong(player_input: str, word: WordEntry, all_attempts: list[str] | None = None) -> None:
+    import scoring as _scoring
     print()
     print(f"  {_red('✗ Mauvaise réponse.')}  Vous avez saisi : {_bold(player_input.upper())}")
+    print(f"  Pénalité : {_red(f'-{_scoring.ERROR_PENALTY} pts')}")
+    if all_attempts and len(all_attempts) > 1:
+        attempts_str = "  ·  ".join(_dim(a) for a in all_attempts[-5:])
+        print(f"  Essais : {attempts_str}")
     print()
 
 

@@ -30,35 +30,43 @@ def build_grid_html(
 
     path_set = puzzle.path_set()
 
-    css = """
+    # Taille des cellules adaptée à la largeur de la grille
+    if puzzle.cols <= 10:
+        cell_px, font_rem, lbl_rem = 35, 1.1, 0.75
+    elif puzzle.cols <= 15:
+        cell_px, font_rem, lbl_rem = 28, 0.9, 0.65
+    else:
+        cell_px, font_rem, lbl_rem = 22, 0.72, 0.55
+
+    css = f"""
 <style>
-.melimo-wrap { overflow-x: auto; }
-.melimo-grid {
+.melimo-wrap {{ overflow-x: auto; }}
+.melimo-grid {{
     border-collapse: collapse;
     font-family: 'Courier New', monospace;
-    font-size: 1.13rem;
+    font-size: {font_rem}rem;
     margin: 0 auto;
-}
-.melimo-grid td {
-    width: 35px;
-    height: 35px;
+}}
+.melimo-grid td {{
+    width: {cell_px}px;
+    height: {cell_px}px;
     text-align: center;
     vertical-align: middle;
     border: 1px solid #484848;
     border-radius: 3px;
     user-select: none;
-}
-.melimo-grid .lbl {
+}}
+.melimo-grid .lbl {{
     color: #888;
-    font-size: 0.75rem;
+    font-size: {lbl_rem}rem;
     border: none;
     padding: 0 3px;
-}
-.g-found  { background: #0d5c1e; color: #50ff80; font-weight: bold; border-color: #1a8a30; }
-.g-start  { background: #0a3068; color: #64c8ff; font-weight: bold; border-color: #1a5aaa; }
-.g-hint   { background: #6b4400; color: #ffd740; font-weight: bold; border-color: #aa7000; }
-.g-path   { background: #303030; color: #e8e8e8; }
-.g-off    { background: #303030; color: #e8e8e8; }
+}}
+.g-found  {{ background: #0d5c1e; color: #50ff80; font-weight: bold; border-color: #1a8a30; }}
+.g-start  {{ background: #0a3068; color: #64c8ff; font-weight: bold; border-color: #1a5aaa; }}
+.g-hint   {{ background: #6b4400; color: #ffd740; font-weight: bold; border-color: #aa7000; }}
+.g-path   {{ background: #303030; color: #e8e8e8; }}
+.g-off    {{ background: #303030; color: #e8e8e8; }}
 </style>
 """
 
