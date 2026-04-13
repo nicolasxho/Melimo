@@ -1,34 +1,19 @@
 # TODO — Améliorations Mélimo
 
-## P0 — Bugs critiques
+## P0 — Bugs critiques ✅
 
-- [ ] **Temps mal calculé dans le résumé** (`summary.py:66`)
-  Le code récupère le timestamp de début brut au lieu de calculer `time.time() - start_time`. Les métriques de temps sont incorrectes.
-
-- [ ] **Indice dépensable après la bonne réponse** (`views/game.py:160`)
-  Un joueur peut cliquer "Indice" alors que son mot est déjà validé et perdre 20 pts inutilement. Ajouter une vérification avant d'incrémenter `state.hints`.
-
-- [ ] **Crash sur puzzle vide** (`display.py:129`)
-  `max(w.length() for w in puzzle.words)` lève une `ValueError` si la liste est vide. Ajouter un `default=10` comme dans la version web (`clues.py:54`).
+- [x] **Temps mal calculé dans le résumé** — `word_elapsed` ajouté à `GameState`, enregistré à la validation, affiché correctement dans `summary.py`.
+- [x] **Indice dépensable après la bonne réponse** — garde ajoutée dans `views/game.py` (`if not state.is_word_correct`).
+- [x] **Crash sur puzzle vide** — `max(..., default=10)` dans `display.py`.
 
 ---
 
-## P1 — Gameplay
+## P1 — Gameplay ✅
 
-- [ ] **Indices progressifs** (3 niveaux de pénalité croissante)
-  - Indice 1 : nombre de lettres (−10 pts)
-  - Indice 2 : première lettre (−20 pts)
-  - Indice 3 : position sur la grille (−30 pts)
-  Remplace l'indice unique actuel à −20 pts.
-
-- [ ] **Option "Révéler le mot"** pour se débloquer
-  Permettre de révéler la réponse pour 0 point et passer au mot suivant, plutôt que d'être bloqué ou de quitter.
-
-- [ ] **Score potentiel en temps réel**
-  Afficher dans le panneau de droite le score que le joueur obtiendrait s'il répondait maintenant (base − temps écoulé − erreurs − indices), pour rendre l'enjeu visible.
-
-- [ ] **Mode contre-la-montre**
-  Timer global (ex : 5 min) pour trouver le maximum de mots. Variante rapide du mode normal.
+- [x] **Indices progressifs** (3 niveaux) — niveau 1 : nb lettres (−10 pts), niveau 2 : 1re lettre (−20 pts), niveau 3 : grille (−30 pts). Implémenté dans `scoring.py`, `game.py`, `views/game.py`.
+- [x] **Option "Révéler le mot"** — bouton "👁 Révéler (0 pt)" en web, commande `r` en CLI. Le mot est ajouté à `state.revealed`, 0 point accordé.
+- [x] **Score potentiel en temps réel** — affiché dans le panneau de droite (mis à jour à chaque rerun).
+- [x] **Mode contre-la-montre** — choix 3/5/10 min dans les deux écrans setup. Compte à rebours affiché en haut à droite, auto-redirect vers le résumé à expiration.
 
 ---
 

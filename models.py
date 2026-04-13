@@ -80,9 +80,10 @@ class GameState:
     revealed: set[int] = field(default_factory=set)              # mots révélés (0 point)
     score: int = 0
     mystery_found: bool = False
-    errors: dict[int, int] = field(default_factory=dict)         # numéro → nb d'erreurs
-    hints: dict[int, int] = field(default_factory=dict)          # numéro → nb d'indices
-    word_start_times: dict[int, float] = field(default_factory=dict)  # numéro → timestamp de début
+    errors: dict[int, int] = field(default_factory=dict)          # numéro → nb d'erreurs
+    hints: dict[int, int] = field(default_factory=dict)           # numéro → nb d'indices
+    word_start_times: dict[int, float] = field(default_factory=dict)   # numéro → timestamp de début
+    word_elapsed: dict[int, float] = field(default_factory=dict)  # numéro → secondes écoulées (enregistré à la validation)
 
     def is_word_correct(self, word_number: int) -> bool:
         from validation import check_answer

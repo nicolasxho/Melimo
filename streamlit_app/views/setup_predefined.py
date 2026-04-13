@@ -4,6 +4,7 @@
 from __future__ import annotations
 import os
 import sys
+import time
 import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -15,6 +16,13 @@ PUZZLES_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     "puzzles",
 )
+
+TIMER_OPTIONS: dict[str, int | None] = {
+    "Pas de limite": None,
+    "3 minutes": 180,
+    "5 minutes": 300,
+    "10 minutes": 600,
+}
 
 
 def render() -> None:
@@ -35,6 +43,7 @@ def render() -> None:
             options=files,
             format_func=lambda f: os.path.splitext(f)[0].replace("_", " "),
         )
+        timer_label = st.selectbox("⏱ Limite de temps", options=list(TIMER_OPTIONS.keys()))
 
         if st.button("▶  Jouer", use_container_width=True):
             path = os.path.join(PUZZLES_DIR, selected)
@@ -49,6 +58,9 @@ def render() -> None:
                 st.session_state.hint_active = False
                 st.session_state.last_feedback = None
                 st.session_state.answer_input_key = 0
+                st.session_state.word_start_time = None
+                st.session_state.game_timer_duration = TIMER_OPTIONS[timer_label]
+                st.session_state.game_start_time = time.time() if TIMER_OPTIONS[timer_label] else None
                 st.session_state.screen = "game"
                 st.rerun()
             except PuzzleLoadError as exc:

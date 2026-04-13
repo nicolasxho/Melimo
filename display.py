@@ -126,7 +126,7 @@ def render_clues(
     print()
 
     # Largeur fixe pour la colonne "réponse/tirets" : longueur du mot le plus long
-    max_len = max(w.length() for w in puzzle.words)
+    max_len = max((w.length() for w in puzzle.words), default=10)
 
     for word in puzzle.words:
         print("  " + _format_clue(word, state, current_word_number, max_len))

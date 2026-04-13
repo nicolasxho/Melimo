@@ -17,7 +17,9 @@ def init_state() -> None:
         "hint_active": False,
         "last_feedback": None,
         "answer_input_key": 0,
-        "word_start_time": None,   # timestamp (float) du début du mot courant
+        "word_start_time": None,      # timestamp (float) du début du mot courant
+        "game_timer_duration": None,  # durée totale en secondes (None = pas de timer)
+        "game_start_time": None,      # timestamp de début de la partie
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -33,6 +35,8 @@ def reset_game() -> None:
     st.session_state.last_feedback = None
     st.session_state.answer_input_key = 0
     st.session_state.word_start_time = None
+    st.session_state.game_timer_duration = None
+    st.session_state.game_start_time = None
     st.session_state.screen = "home"
 
 

@@ -16,12 +16,54 @@ from streamlit_app.components.clues import build_clues_html
 import scoring
 
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _elapsed_now(word_number: int, state) -> float:
+    """Secondes écoulées depuis le début du mot courant."""
+    start = state.word_start_times.get(word_number)
+    return time.time() - start if start else 0.0
+
+
+def _score_details(word_score: int, elapsed: int, errors: int, hints: int) -> str:
+    """Ligne de détail du score pour le feedback."""
+    parts: list[str] = [f"⏱ {elapsed}s"]
+    if errors:
+        parts.append(f"✗ {errors} erreur{'s' if errors > 1 else ''} (−{errors * scoring.ERROR_PENALTY} pts)")
+    if hints:
+        hp = scoring.hint_total_penalty(hints)
+        parts.append(f"💡 {hints} indice{'s' if hints > 1 else ''} (−{hp} pts)")
+    return " · ".join(parts)
+
+
+def _timer_remaining() -> float | None:
+    """Secondes restantes, ou None si pas de timer."""
+    duration = st.session_state.get("game_timer_duration")
+    start = st.session_state.get("game_start_time")
+    if duration is None or start is None:
+        return None
+    return max(0.0, duration - (time.time() - start))
+
+
+def _fmt_time(seconds: float) -> str:
+    m, s = divmod(int(seconds), 60)
+    return f"{m}:{s:02d}"
+
+
+# ── Vue principale ────────────────────────────────────────────────────────────
+
 def render() -> None:
     puzzle = st.session_state.puzzle
     state = st.session_state.game_state
 
     if puzzle is None or state is None:
         st.session_state.screen = "home"
+        st.rerun()
+        return
+
+    # ── Vérification du timer ─────────────────────────────────────────────────
+    remaining = _timer_remaining()
+    if remaining is not None and remaining <= 0:
+        st.session_state.screen = "summary"
         st.rerun()
         return
 
@@ -49,10 +91,21 @@ def render() -> None:
             start_hint_cell = puzzle.path[prev_word.end_index - 1]
 
     # ── Titre + progression ───────────────────────────────────────────────────
-    st.markdown(
-        f"<h3 style='color:#4caf50; margin-bottom:4px;'>{puzzle.title}</h3>",
-        unsafe_allow_html=True,
-    )
+    title_col, timer_col = st.columns([4, 1])
+    with title_col:
+        st.markdown(
+            f"<h3 style='color:#4caf50; margin-bottom:4px;'>{puzzle.title}</h3>",
+            unsafe_allow_html=True,
+        )
+    with timer_col:
+        if remaining is not None:
+            color = "#f44336" if remaining < 60 else "#ff9800" if remaining < 120 else "#4caf50"
+            st.markdown(
+                f"<div style='text-align:right; font-size:1.4rem; font-weight:bold; color:{color}; padding-top:8px;'>"
+                f"⏱ {_fmt_time(remaining)}</div>",
+                unsafe_allow_html=True,
+            )
+
     answered = sum(1 for w in puzzle.words if state.is_word_correct(w.number))
     st.progress(answered / total_words, text=f"{answered}/{total_words} mots trouvés")
 
@@ -72,27 +125,28 @@ def render() -> None:
         # ── Feedback du tour précédent ────────────────────────────────────────
         feedback = st.session_state.last_feedback
         if feedback:
-            if feedback["kind"] == "correct":
-                word_score = feedback.get("word_score", 0)
-                elapsed = feedback.get("elapsed", 0)
-                errors = feedback.get("errors", 0)
-                hints = feedback.get("hints", 0)
-                details = _score_details(word_score, elapsed, errors, hints)
-                st.success(f"✓ Correct !  **{feedback['word'].answer}**  — +{word_score} pts\n\n{details}")
-            elif feedback["kind"] == "mystery":
-                word_score = feedback.get("word_score", 0)
-                elapsed = feedback.get("elapsed", 0)
-                errors = feedback.get("errors", 0)
-                hints = feedback.get("hints", 0)
-                details = _score_details(word_score, elapsed, errors, hints)
-                st.success(f"🎉 MOT MYSTÈRE !  **{feedback['word'].answer}**  — +{word_score} pts\n\n{details}")
-                st.balloons()
-            elif feedback["kind"] == "wrong":
-                penalty = scoring.ERROR_PENALTY
-                st.error(f"✗ Mauvaise réponse. — -{penalty} pts de pénalité")
-            elif feedback["kind"] == "hint":
-                penalty = scoring.HINT_PENALTY
-                st.warning(f"💡 Indice affiché — -{penalty} pts de pénalité")
+            kind = feedback["kind"]
+            if kind in ("correct", "mystery"):
+                ws = feedback.get("word_score", 0)
+                details = _score_details(
+                    ws,
+                    feedback.get("elapsed", 0),
+                    feedback.get("errors", 0),
+                    feedback.get("hints", 0),
+                )
+                icon = "🎉 MOT MYSTÈRE !" if kind == "mystery" else "✓ Correct !"
+                st.success(f"{icon}  **{feedback['word'].answer}**  — +{ws} pts\n\n{details}")
+                if kind == "mystery":
+                    st.balloons()
+            elif kind == "wrong":
+                st.error(f"✗ Mauvaise réponse. — −{scoring.ERROR_PENALTY} pts de pénalité")
+            elif kind == "hint":
+                level = feedback.get("hint_level", 1)
+                cost = scoring.HINT_PENALTIES[level - 1]
+                label = scoring.HINT_LABELS[level - 1]
+                st.warning(f"💡 Indice {level} — {label} (−{cost} pts)")
+            elif kind == "reveal":
+                st.info(f"👁 Mot révélé : **{feedback['word'].answer}** — 0 pt")
             st.session_state.last_feedback = None
 
         # ── Fin de partie ─────────────────────────────────────────────────────
@@ -102,7 +156,7 @@ def render() -> None:
                 st.session_state.screen = "summary"
                 st.rerun()
 
-        # ── Saisie de la réponse (sous la grille, Enter = Valider) ────────────
+        # ── Saisie de la réponse ──────────────────────────────────────────────
         elif current_word is not None:
             if current_word.is_mystery:
                 prompt = f"Mot {current_word.number} — ★ MOT MYSTÈRE ({current_word.letter_count_hint} lettres)"
@@ -110,74 +164,114 @@ def render() -> None:
                 prompt = f"Mot {current_word.number}"
 
             answer_key = f"answer_{st.session_state.answer_input_key}"
+            hints_used = state.hints.get(current_word.number, 0)
+            next_cost = scoring.hint_next_cost(hints_used)
+            next_label = scoring.hint_next_label(hints_used)
 
             with st.form(key="answer_form", clear_on_submit=True):
                 user_input = st.text_input(prompt, key=answer_key)
-                form_col1, form_col2, form_col3 = st.columns(3)
-                with form_col1:
+                fc1, fc2, fc3, fc4 = st.columns(4)
+                with fc1:
                     submitted = st.form_submit_button("✓ Valider", use_container_width=True)
-                with form_col2:
-                    hint_clicked = st.form_submit_button("💡 Indice", use_container_width=True)
-                with form_col3:
+                with fc2:
+                    hint_label = (
+                        f"💡 Indice {hints_used + 1} (−{next_cost} pts)"
+                        if next_cost is not None
+                        else "💡 Indices épuisés"
+                    )
+                    hint_clicked = st.form_submit_button(hint_label, use_container_width=True)
+                with fc3:
+                    reveal_clicked = st.form_submit_button("👁 Révéler (0 pt)", use_container_width=True)
+                with fc4:
                     quit_clicked = st.form_submit_button("🚪 Quitter", use_container_width=True)
 
+            # ── Traitement des actions ────────────────────────────────────────
             if submitted and user_input.strip():
                 if check_answer(user_input, current_word):
                     state.answers[current_word.number] = current_word.answer
-                    elapsed = time.time() - (state.word_start_times.get(current_word.number) or time.time())
+                    elapsed = _elapsed_now(current_word.number, state)
+                    state.word_elapsed[current_word.number] = elapsed
                     errors = state.errors.get(current_word.number, 0)
                     hints = state.hints.get(current_word.number, 0)
                     word_score = scoring.compute_word_score(current_word.is_mystery, elapsed, errors, hints)
                     state.score += word_score
                     if current_word.is_mystery:
                         state.mystery_found = True
-                        st.session_state.last_feedback = {
-                            "kind": "mystery",
-                            "word": current_word,
-                            "word_score": word_score,
-                            "elapsed": int(elapsed),
-                            "errors": errors,
-                            "hints": hints,
-                        }
-                    else:
-                        st.session_state.last_feedback = {
-                            "kind": "correct",
-                            "word": current_word,
-                            "word_score": word_score,
-                            "elapsed": int(elapsed),
-                            "errors": errors,
-                            "hints": hints,
-                        }
+                    st.session_state.last_feedback = {
+                        "kind": "mystery" if current_word.is_mystery else "correct",
+                        "word": current_word,
+                        "word_score": word_score,
+                        "elapsed": int(elapsed),
+                        "errors": errors,
+                        "hints": hints,
+                    }
                     st.session_state.answer_input_key += 1
                     st.session_state.hint_active = False
-                    st.session_state.word_start_time = None  # reset pour le prochain mot
+                    st.session_state.word_start_time = None
                     st.session_state.current_word_idx = idx + 1
                 else:
                     state.errors[current_word.number] = state.errors.get(current_word.number, 0) + 1
                     st.session_state.last_feedback = {"kind": "wrong", "word": current_word}
                 st.rerun()
 
-            if hint_clicked:
-                state.hints[current_word.number] = state.hints.get(current_word.number, 0) + 1
-                st.session_state.hint_active = True
-                st.session_state.last_feedback = {"kind": "hint", "word": current_word}
+            if hint_clicked and next_cost is not None:
+                # P0.2 — garde : n'appliquer que si le mot n'est pas encore trouvé
+                if not state.is_word_correct(current_word.number):
+                    new_level = hints_used + 1
+                    state.hints[current_word.number] = new_level
+                    if new_level >= 3:
+                        st.session_state.hint_active = True
+                    st.session_state.last_feedback = {
+                        "kind": "hint",
+                        "word": current_word,
+                        "hint_level": new_level,
+                    }
+                    st.rerun()
+
+            if reveal_clicked:
+                state.revealed.add(current_word.number)
+                state.answers[current_word.number] = current_word.answer
+                elapsed = _elapsed_now(current_word.number, state)
+                state.word_elapsed[current_word.number] = elapsed
+                st.session_state.last_feedback = {"kind": "reveal", "word": current_word}
+                st.session_state.answer_input_key += 1
+                st.session_state.hint_active = False
+                st.session_state.word_start_time = None
+                st.session_state.current_word_idx = idx + 1
                 st.rerun()
 
             if quit_clicked:
                 st.session_state.screen = "summary"
                 st.rerun()
 
+    # ── Panneau droit : score + indices révélés + score potentiel ────────────
     with col_play:
         st.metric("Score", f"{state.score} pt{'s' if state.score > 1 else ''}")
+
+        # Score potentiel en temps réel (P1.3)
+        if current_word is not None and not game_complete:
+            elapsed_now = _elapsed_now(current_word.number, state)
+            errors_now = state.errors.get(current_word.number, 0)
+            hints_now = state.hints.get(current_word.number, 0)
+            potential = scoring.compute_word_score(
+                current_word.is_mystery, elapsed_now, errors_now, hints_now
+            )
+            label = "★ Score potentiel" if current_word.is_mystery else "Score potentiel"
+            st.metric(label, f"+{potential} pts")
+
+            # Indices déjà obtenus
+            if hints_now >= 1:
+                st.markdown(f"**Indice 1** — {current_word.length()} lettres")
+            if hints_now >= 2:
+                st.markdown(f"**Indice 2** — Commence par **{current_word.answer[0]}**")
+
         clues_html = build_clues_html(puzzle, state, current_word_num)
         st.markdown(clues_html, unsafe_allow_html=True)
 
-
-def _score_details(word_score: int, elapsed: int, errors: int, hints: int) -> str:
-    """Construit une ligne de détail du score pour le feedback."""
-    parts: list[str] = [f"⏱ {elapsed}s"]
-    if errors:
-        parts.append(f"✗ {errors} erreur{'s' if errors > 1 else ''} (-{errors * scoring.ERROR_PENALTY} pts)")
-    if hints:
-        parts.append(f"💡 {hints} indice{'s' if hints > 1 else ''} (-{hints * scoring.HINT_PENALTY} pts)")
-    return " · ".join(parts)
+    # ── Auto-refresh si timer actif ───────────────────────────────────────────
+    if remaining is not None:
+        # Rafraîchit la page toutes les 10 s pour mettre à jour le compte à rebours
+        st.markdown(
+            "<script>setTimeout(function(){window.location.reload()}, 10000);</script>",
+            unsafe_allow_html=True,
+        )
