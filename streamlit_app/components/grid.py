@@ -62,11 +62,11 @@ def build_grid_html(
     border: none;
     padding: 0 3px;
 }}
-.g-found  { background: #0d5c1e; color: #50ff80; font-weight: bold; border-color: #1a8a30; }
-.g-start  { background: #0a3068; color: #64c8ff; font-weight: bold; border-color: #1a5aaa; }
-.g-hint   { background: #6b4400; color: #ffd740; font-weight: bold; border-color: #aa7000; }
-.g-path   { background: #303030; color: #e8e8e8; }
-.g-off    { background: #303030; color: #e8e8e8; }
+.g-found  {{ background: #0d5c1e; color: #50ff80; font-weight: bold; border-color: #1a8a30; }}
+.g-start  {{ background: #0a3068; color: #64c8ff; font-weight: bold; border-color: #1a5aaa; }}
+.g-hint   {{ background: #6b4400; color: #ffd740; font-weight: bold; border-color: #aa7000; }}
+.g-path   {{ background: #303030; color: #e8e8e8; }}
+.g-off    {{ background: #303030; color: #e8e8e8; }}
 </style>
 """
 

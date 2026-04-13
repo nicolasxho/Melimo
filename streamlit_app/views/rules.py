@@ -38,7 +38,7 @@ sur un chemin caché dans la grille. Chaque mot débute là où le précédent s
 |---|---|
 | Réponse correcte | **+{scoring.BASE_SCORE} pts** de base |
 | Mot mystère | ×**{scoring.MYSTERY_MULTIPLIER}** (base doublée) |
-| Temps | **−{scoring.TIME_PENALTY_RATE:.0f} pt/seconde** écoulée |
+| Temps | **−{scoring.TIME_PENALTY_RATE:g} pt/seconde** écoulée |
 | Mauvaise réponse | **−{scoring.ERROR_PENALTY} pts** |
 | {hint_costs} | (pénalité cumulative) |
 | Minimum garanti | **{scoring.MIN_WORD_SCORE} pts** par mot trouvé |

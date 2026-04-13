@@ -22,7 +22,10 @@ def render() -> None:
 
     total = len(puzzle.words)
     # correct = mots trouvés par le joueur (sans révélation)
-    correct = sum(1 for w in puzzle.words if state.is_word_correct(w.number))
+    correct = sum(
+        1 for w in puzzle.words
+        if state.is_word_correct(w.number) and w.number not in state.revealed
+    )
     revealed_count = len(state.revealed)
     # answered = total des mots résolus (trouvés + révélés)
     answered = correct + revealed_count
@@ -122,7 +125,7 @@ def render() -> None:
     hint_costs = " / ".join(f"−{c} pts" for c in scoring.HINT_PENALTIES)
     st.markdown(
         f"**Barème** : base {scoring.BASE_SCORE} pts/mot · "
-        f"−{scoring.TIME_PENALTY_RATE:.0f} pts/sec · "
+        f"−{scoring.TIME_PENALTY_RATE:g} pts/sec · "
         f"−{scoring.ERROR_PENALTY} pts/erreur · "
         f"indices progressifs {hint_costs} · "
         f"mot mystère ×{scoring.MYSTERY_MULTIPLIER} · "
