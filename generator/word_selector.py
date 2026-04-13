@@ -71,7 +71,7 @@ def select_words(
     Retourne une liste de tuples (mot_normalisé, définition).
     Lève ValueError si impossible de trouver une combinaison valide.
     """
-    from dictionary.wiktionary import fetch_and_cache
+    from dictionary.wiktionary import fetch_and_cache_full
 
     if not word_list:
         raise ValueError("La liste de mots est vide.")
@@ -97,18 +97,22 @@ def select_words(
     pool = cached_words[:n_words * 4] + uncached_words[:n_words * 2]
     pool = pool[:min(n_words * 6, len(word_list))]
 
-    defs: dict[str, str] = {}
+    # defs : mot_normalisé → (display_definition, full_definition)
+    defs: dict[str, tuple[str, str]] = {}
     for normalized, original in pool:
         key = original.upper()
         if key in cache:
-            defs[normalized] = cache[key]
+            stored = cache[key]
+            display = stored[:77] + "..." if len(stored) > 80 else stored
+            defs[normalized] = (display, stored)
         elif normalized in cache:
-            defs[normalized] = cache[normalized]
+            stored = cache[normalized]
+            display = stored[:77] + "..." if len(stored) > 80 else stored
+            defs[normalized] = (display, stored)
         else:
-            defn = fetch_and_cache(original, cache_path)
-            if defn:
-                cache[original.upper()] = defn
-                defs[normalized] = defn
+            result = fetch_and_cache_full(original, cache_path)
+            if result:
+                defs[normalized] = result
         if len(defs) >= n_words * 3:
             break  # Pool suffisant, pas besoin d'aller plus loin
 
@@ -132,7 +136,7 @@ def select_words(
             f"~{target_path_length} lettres parmi les {len(defs)} mots disponibles."
         )
 
-    return [(word, defs[word]) for word in selection]
+    return [(word, defs[word][0], defs[word][1]) for word in selection]
 
 
 def _find_combination(

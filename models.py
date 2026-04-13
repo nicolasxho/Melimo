@@ -34,6 +34,7 @@ class WordEntry:
     end_index: int       # Index de fin dans puzzle.path (exclusif)
     letter_count_hint: int | None = None  # Nombre de lettres si indiqué
     is_mystery: bool = False              # Vrai pour le MOT MYSTÈRE
+    full_definition: str | None = None   # Définition complète (non tronquée)
 
     def length(self) -> int:
         return self.end_index - self.start_index

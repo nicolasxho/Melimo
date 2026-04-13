@@ -56,18 +56,21 @@ def fetch_definition(word: str) -> str | None:
     if not wikitext:
         return None
 
-    return _extract_french_definition(wikitext)
+    result = _extract_french_definition(wikitext)
+    if result is None:
+        return None
+    display, _full = result
+    return display
 
 
-def _extract_french_definition(wikitext: str) -> str | None:
+def _extract_french_definition(wikitext: str) -> tuple[str, str] | None:
     """
     Extrait la première définition de la section française du wikitext.
-    Les définitions sont sur des lignes commençant par '# ' (pas '#*' ni '#:').
+    Retourne (display, full) où display est tronqué à 80 chars et full à 300 chars.
     """
     # Localiser la section française (== {{langue|fr}} ==)
     fr_match = re.search(r"== \{\{langue\|fr\}\} ==", wikitext)
     if not fr_match:
-        # Essai sans la balise langue (certaines pages simples)
         fr_start = 0
     else:
         fr_start = fr_match.start()
@@ -81,12 +84,11 @@ def _extract_french_definition(wikitext: str) -> str | None:
     # Extraire les lignes de définition (commencent par '# ' mais pas '#*' ni '#:')
     for line in fr_section.splitlines():
         if re.match(r"^# ", line) and not re.match(r"^#[*:]", line):
-            definition = _clean_wikitext(line[2:])  # Retirer le '# '
-            if definition and len(definition) > 10:
-                # Tronquer à 80 caractères
-                if len(definition) > 80:
-                    definition = definition[:77] + "..."
-                return definition
+            full = _clean_wikitext(line[2:])
+            if full and len(full) > 10:
+                full = full[:297] + "..." if len(full) > 300 else full
+                display = full[:77] + "..." if len(full) > 80 else full
+                return display, full
 
     return None
 
@@ -133,6 +135,53 @@ def fetch_and_cache(word: str, cache_path: str = CACHE_PATH) -> str | None:
         _save_cache(cache)
 
     return definition
+
+
+def fetch_and_cache_full(word: str, cache_path: str = CACHE_PATH) -> tuple[str, str] | None:
+    """
+    Comme fetch_and_cache mais retourne (display, full).
+    Stocke la définition complète dans le cache (nouvelles entrées).
+    Pour les anciennes entrées tronquées, display == full (pas de tooltip).
+    """
+    key = word.upper()
+    cache = _load_cache()
+
+    if key in cache:
+        stored = cache[key]
+        display = stored[:77] + "..." if len(stored) > 80 else stored
+        return display, stored
+
+    result = _extract_french_definition_raw(word)
+    if result is None:
+        return None
+    display, full = result
+    cache[key] = full
+    _save_cache(cache)
+    return display, full
+
+
+def _extract_french_definition_raw(word: str) -> tuple[str, str] | None:
+    """Appelle l'API Wiktionnaire et retourne (display, full) sans passer par le cache."""
+    word_lower = word.lower()
+    params = urllib.parse.urlencode({
+        "action": "parse",
+        "page": word_lower,
+        "prop": "wikitext",
+        "format": "json",
+    })
+    url = f"{WIKTIONARY_API}?{params}"
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, json.JSONDecodeError, OSError):
+        return None
+    if "error" in data:
+        return None
+    wikitext = data.get("parse", {}).get("wikitext", {}).get("*", "")
+    if not wikitext:
+        return None
+    return _extract_french_definition(wikitext)
 
 
 def load_cache_once(cache_path: str = CACHE_PATH) -> dict[str, str]:

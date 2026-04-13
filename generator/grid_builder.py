@@ -48,7 +48,7 @@ def build_puzzle(
 
     Lève ValueError si la somme des longueurs dépasse la longueur du chemin.
     """
-    total_letters = sum(len(normalize_answer(w)) for w, _ in words_with_defs)
+    total_letters = sum(len(normalize_answer(w)) for w, _, _fd in words_with_defs)
     if total_letters > len(path):
         raise ValueError(
             f"Total des lettres ({total_letters}) > longueur du chemin ({len(path)}). "
@@ -65,7 +65,7 @@ def build_puzzle(
     word_entries: list[WordEntry] = []
     path_index = 0
 
-    for i, (word, definition) in enumerate(words_with_defs):
+    for i, (word, definition, full_definition) in enumerate(words_with_defs):
         normalized = normalize_answer(word)
         start_idx = path_index
         end_idx = path_index + len(normalized)
@@ -86,6 +86,7 @@ def build_puzzle(
             end_index=end_idx,
             letter_count_hint=hint,
             is_mystery=is_mystery,
+            full_definition=full_definition,
         ))
 
         path_index = end_idx
@@ -140,7 +141,7 @@ def generate_puzzle(
     )
 
     # Ajuster la longueur du chemin à la somme exacte des mots sélectionnés
-    total_letters = sum(len(w) for w, _ in words_with_defs)
+    total_letters = sum(len(w) for w, _, _fd in words_with_defs)
     # Ajouter quelques cellules supplémentaires (lettres inutilisées sur le chemin)
     path_length = total_letters + random.randint(0, max(5, rows))
 

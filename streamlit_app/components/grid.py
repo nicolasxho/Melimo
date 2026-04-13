@@ -44,20 +44,21 @@ def build_grid_html(
     height: 35px;
     text-align: center;
     vertical-align: middle;
-    border: 1px solid #2a2a2a;
+    border: 1px solid #484848;
+    border-radius: 3px;
     user-select: none;
 }
 .melimo-grid .lbl {
-    color: #555;
+    color: #888;
     font-size: 0.75rem;
     border: none;
     padding: 0 3px;
 }
-.g-found  { background: #1a5c1a; color: #7dff7d; font-weight: bold; }
-.g-start  { background: #1a3a5c; color: #7db8ff; font-weight: bold; }
-.g-hint   { background: #7a5900; color: #ffd54f; font-weight: bold; }
-.g-path   { background: #2b2b2b; color: #999; }
-.g-off    { background: #2b2b2b; color: #999; }
+.g-found  { background: #0d5c1e; color: #50ff80; font-weight: bold; border-color: #1a8a30; }
+.g-start  { background: #0a3068; color: #64c8ff; font-weight: bold; border-color: #1a5aaa; }
+.g-hint   { background: #6b4400; color: #ffd740; font-weight: bold; border-color: #aa7000; }
+.g-path   { background: #303030; color: #e8e8e8; }
+.g-off    { background: #303030; color: #e8e8e8; }
 </style>
 """
 
