@@ -27,6 +27,12 @@ def render() -> None:
             st.rerun()
 
     st.markdown("")
-    if st.button("❓  Règles du jeu", use_container_width=True):
-        st.session_state.screen = "rules"
-        st.rerun()
+    col3, col4 = st.columns(2)
+    with col3:
+        if st.button("❓  Règles du jeu", use_container_width=True):
+            st.session_state.screen = "rules"
+            st.rerun()
+    with col4:
+        if st.button("ℹ️  À propos", use_container_width=True):
+            st.session_state.screen = "about"
+            st.rerun()

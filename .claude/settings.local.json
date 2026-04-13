@@ -13,7 +13,9 @@
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_tabs",
       "mcp__playwright__browser_wait_for",
-      "mcp__playwright__browser_evaluate"
+      "mcp__playwright__browser_evaluate",
+      "Bash(.venv/Scripts/python dictionary/prefetch.py --stats)",
+      "Bash(.venv/Scripts/python melimo.py --help)"
     ]
   },
   "mcpServers": {

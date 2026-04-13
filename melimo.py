@@ -4,10 +4,12 @@ Mélimo — Jeu de mots en labyrinthe
 Point d'entrée principal.
 
 Usage :
-  python melimo.py                  # Menu interactif
-  python melimo.py --puzzle FILE    # Charger un puzzle JSON directement
-  python melimo.py --verify FILE    # Valider un fichier puzzle JSON
-  python melimo.py --generate       # Générer et jouer une partie
+  python melimo.py                          # Menu interactif
+  python melimo.py --puzzle FILE            # Charger un puzzle JSON directement
+  python melimo.py --verify FILE            # Valider un fichier puzzle JSON
+  python melimo.py --generate               # Générer et jouer une partie
+  python melimo.py --prefetch               # Pré-télécharger les définitions (tous thèmes)
+  python melimo.py --prefetch --theme THEME # Pré-télécharger un thème spécifique
 """
 from __future__ import annotations
 import argparse
@@ -22,7 +24,8 @@ from game import run_game, run_menu
 
 PUZZLES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "puzzles")
 
-THEMES = ["general", "nature", "sport"]
+from generator.word_selector import available_themes as _available_themes
+THEMES = _available_themes()
 DIFFICULTIES = ["facile", "moyen", "difficile"]
 SIZES = {
     "petite": (10, 10),
@@ -42,10 +45,20 @@ def main() -> None:
                         help="Valider l'intégrité d'un fichier puzzle JSON")
     parser.add_argument("--generate", "-g", action="store_true",
                         help="Générer une partie directement (mode rapide)")
+    parser.add_argument("--prefetch", action="store_true",
+                        help="Pré-télécharger les définitions Wiktionnaire dans le cache")
+    parser.add_argument("--theme", metavar="THEME", default=None,
+                        help="Limiter le prefetch à un thème spécifique")
 
     args = parser.parse_args()
 
     display.print_banner()
+
+    # ── Mode pré-téléchargement ────────────────────────────────────────────
+    if args.prefetch:
+        from dictionary.prefetch import run_prefetch
+        run_prefetch(theme=args.theme)
+        return
 
     # ── Mode vérification ──────────────────────────────────────────────────
     if args.verify:

@@ -20,11 +20,16 @@ DIFFICULTY_LENGTHS = {
     "difficile": (6, 12),
 }
 
-THEMES = {
-    "general": "general.txt",
-    "nature": "nature.txt",
-    "sport": "sport.txt",
-}
+def _discover_themes() -> dict[str, str]:
+    """Scanne words/*.txt et retourne {nom_theme: fichier}, trié alphabétiquement."""
+    result: dict[str, str] = {}
+    if os.path.isdir(WORDS_DIR):
+        for f in sorted(os.listdir(WORDS_DIR)):
+            if f.endswith(".txt"):
+                result[os.path.splitext(f)[0]] = f
+    return result
+
+THEMES = _discover_themes()
 
 
 def load_word_list(theme: str | None = None, difficulty: str = "moyen") -> list[str]:

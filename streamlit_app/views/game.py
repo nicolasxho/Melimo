@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import streamlit as st
+import streamlit.components.v1 as components
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -101,11 +102,43 @@ def render() -> None:
     with timer_col:
         if remaining is not None:
             color = "#f44336" if remaining < 60 else "#ff9800" if remaining < 120 else "#4caf50"
-            st.markdown(
-                f"<div style='text-align:right; font-size:1.4rem; font-weight:bold;"
-                f" color:{color}; padding-top:8px;'>⏱ {_fmt_time(remaining)}</div>",
-                unsafe_allow_html=True,
-            )
+            start_ts = st.session_state.game_start_time
+            duration = st.session_state.game_timer_duration
+            components.html(f"""
+                <style>
+                    body {{ margin:0; padding:0; background:transparent; overflow:hidden; }}
+                    #timer {{
+                        text-align: right;
+                        font-size: 1.35rem;
+                        font-weight: bold;
+                        color: {color};
+                        padding-top: 8px;
+                        font-family: 'Source Sans Pro', 'Segoe UI', sans-serif;
+                    }}
+                </style>
+                <div id="timer">&#x23F1; {_fmt_time(remaining)}</div>
+                <script>
+                    var start    = {start_ts};
+                    var duration = {duration};
+                    function fmt(sec) {{
+                        var m = Math.floor(sec / 60);
+                        var s = Math.floor(sec % 60);
+                        return m + ':' + (s < 10 ? '0' : '') + s;
+                    }}
+                    function tick() {{
+                        var rem = Math.max(0, duration - (Date.now() / 1000 - start));
+                        document.getElementById('timer').textContent = '\\u23F1 ' + fmt(rem);
+                        document.getElementById('timer').style.color =
+                            rem < 60 ? '#f44336' : rem < 120 ? '#ff9800' : '#4caf50';
+                        if (rem > 0) {{
+                            setTimeout(tick, 500);
+                        }} else {{
+                            window.parent.location.reload();
+                        }}
+                    }}
+                    tick();
+                </script>
+            """, height=50)
 
     answered = sum(1 for w in puzzle.words if state.is_word_correct(w.number))
     st.progress(answered / total_words, text=f"{answered}/{total_words} mots trouvés")
@@ -291,9 +324,9 @@ def render() -> None:
         clues_html = build_clues_html(puzzle, state, current_word_num)
         st.markdown(clues_html, unsafe_allow_html=True)
 
-    # ── Auto-refresh si timer actif ───────────────────────────────────────────
+    # ── Auto-refresh toutes les 60 s (sécurité — le JS gère le décompte en temps réel) ──
     if remaining is not None:
         st.markdown(
-            "<script>setTimeout(function(){window.location.reload()}, 10000);</script>",
+            "<script>setTimeout(function(){window.location.reload()}, 60000);</script>",
             unsafe_allow_html=True,
         )

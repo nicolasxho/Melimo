@@ -4,3 +4,4 @@ __pycache__/
 report.pdf
 *.png
 *.yml
+*.log

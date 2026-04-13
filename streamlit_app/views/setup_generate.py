@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from models import GameState, Puzzle
 from generator.grid_builder import generate_puzzle
+from generator.word_selector import available_themes
 
 
 def _init_first_word(state: GameState, puzzle: Puzzle) -> None:
@@ -24,7 +25,7 @@ def _init_first_word(state: GameState, puzzle: Puzzle) -> None:
     state.hints[first.number] = 0
     state.attempts[first.number] = []
 
-THEMES = ["general", "nature", "sport"]
+THEMES = available_themes()
 DIFFICULTIES = ["facile", "moyen", "difficile"]
 SIZES = {
     "Petite (10×10)":  (10, 10),
