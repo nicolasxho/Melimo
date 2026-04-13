@@ -76,10 +76,13 @@ class Puzzle:
 @dataclass
 class GameState:
     puzzle: Puzzle
-    answers: dict[int, str] = field(default_factory=dict)   # numéro → réponse joueur
-    revealed: set[int] = field(default_factory=set)         # mots révélés (0 point)
+    answers: dict[int, str] = field(default_factory=dict)        # numéro → réponse joueur
+    revealed: set[int] = field(default_factory=set)              # mots révélés (0 point)
     score: int = 0
     mystery_found: bool = False
+    errors: dict[int, int] = field(default_factory=dict)         # numéro → nb d'erreurs
+    hints: dict[int, int] = field(default_factory=dict)          # numéro → nb d'indices
+    word_start_times: dict[int, float] = field(default_factory=dict)  # numéro → timestamp de début
 
     def is_word_correct(self, word_number: int) -> bool:
         from validation import check_answer

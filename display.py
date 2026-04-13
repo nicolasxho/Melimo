@@ -183,23 +183,44 @@ def render_score(state: GameState) -> None:
     progress = f"{correct}/{total}"
     mystery_str = _magenta(" + MOT MYSTÈRE !") if state.mystery_found else ""
 
-    print(f"  Score : {score_str}{mystery_str}   |   Trouvés : {progress}   |   Lettres inutiles : {state.puzzle.unused_count}")
+    total_errors = sum(state.errors.values())
+    total_hints = sum(state.hints.values())
+    err_str = _red(f"  |   Erreurs : {total_errors}") if total_errors else ""
+    hint_str = _yellow(f"  |   Indices : {total_hints}") if total_hints else ""
+
+    print(f"  Score : {score_str}{mystery_str}   |   Trouvés : {progress}{err_str}{hint_str}   |   Lettres inutiles : {state.puzzle.unused_count}")
     print()
 
 
 # ── Affichage d'un résultat ───────────────────────────────────────────────────
 
-def print_correct(word: WordEntry) -> None:
+def print_correct(
+    word: WordEntry,
+    word_score: int,
+    elapsed: int,
+    errors: int,
+    hints: int,
+) -> None:
+    import scoring as _scoring
     print()
-    print(f"  {_green('✓ CORRECT !')}  {_bold(word.answer)}")
     if word.is_mystery:
-        print(f"  {_magenta('🎉 MOT MYSTÈRE découvert ! +1 point bonus !')}")
+        print(f"  {_magenta('🎉 MOT MYSTÈRE !')}  {_bold(word.answer)}  {_green(f'+{word_score} pts')}")
+    else:
+        print(f"  {_green('✓ CORRECT !')}  {_bold(word.answer)}  {_green(f'+{word_score} pts')}")
+    parts: list[str] = [f"⏱ {elapsed}s"]
+    if errors:
+        parts.append(_red(f"✗ {errors} erreur{'s' if errors > 1 else ''} (-{errors * _scoring.ERROR_PENALTY} pts)"))
+    if hints:
+        parts.append(_yellow(f"💡 {hints} indice{'s' if hints > 1 else ''} (-{hints * _scoring.HINT_PENALTY} pts)"))
+    print(f"  {' · '.join(parts)}")
     print()
 
 
 def print_wrong(player_input: str, word: WordEntry) -> None:
+    import scoring as _scoring
     print()
     print(f"  {_red('✗ Mauvaise réponse.')}  Vous avez saisi : {_bold(player_input.upper())}")
+    print(f"  Pénalité : {_red(f'-{_scoring.ERROR_PENALTY} pts')}")
     print()
 
 

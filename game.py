@@ -4,10 +4,12 @@ Les mots sont résolus dans l'ordre. Aucune sélection ni révélation possible.
 """
 from __future__ import annotations
 import os
+import time
 
 from models import Puzzle, GameState, WordEntry
 from validation import check_answer
 import display
+import scoring
 
 
 def run_game(puzzle: Puzzle) -> None:
@@ -28,6 +30,11 @@ def run_game(puzzle: Puzzle) -> None:
             return
 
     for word in puzzle.words[1:]:
+        # Enregistrer le moment de début pour ce mot
+        state.word_start_times[word.number] = time.time()
+        state.errors[word.number] = 0
+        state.hints[word.number] = 0
+
         # Boucle interne : répéter jusqu'à la bonne réponse ou abandon
         while not state.is_word_correct(word.number):
             _render_full_screen(state, current_word=word.number)
@@ -47,21 +54,25 @@ def run_game(puzzle: Puzzle) -> None:
                 return
 
             if raw.lower() == "h":
+                state.hints[word.number] = state.hints.get(word.number, 0) + 1
                 _show_hint(state, word)
                 continue
 
             # Tentative de réponse
             state.answers[word.number] = raw
             if check_answer(raw, word):
+                elapsed = time.time() - state.word_start_times[word.number]
+                errors = state.errors.get(word.number, 0)
+                hints = state.hints.get(word.number, 0)
+                word_score = scoring.compute_word_score(word.is_mystery, elapsed, errors, hints)
+                state.score += word_score
                 if word.is_mystery:
                     state.mystery_found = True
-                    state.score += 2
-                else:
-                    state.score += 1
-                display.print_correct(word)
+                display.print_correct(word, word_score, int(elapsed), errors, hints)
                 input("  [Entrée] pour continuer...")
                 break  # Passer au mot suivant
             else:
+                state.errors[word.number] = state.errors.get(word.number, 0) + 1
                 display.print_wrong(raw, word)
                 # Effacer la mauvaise réponse pour permettre de réessayer
                 del state.answers[word.number]
