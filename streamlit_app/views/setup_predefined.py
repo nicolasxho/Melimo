@@ -10,7 +10,19 @@ import streamlit as st
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from loader import load_puzzle, PuzzleLoadError
-from models import GameState
+from models import GameState, Puzzle
+
+
+def _init_first_word(state: GameState, puzzle: Puzzle) -> None:
+    """Révèle le premier mot gratuitement et initialise ses compteurs."""
+    if not puzzle.words:
+        return
+    first = puzzle.words[0]
+    state.answers[first.number] = first.answer
+    state.word_elapsed[first.number] = 0.0
+    state.errors[first.number] = 0
+    state.hints[first.number] = 0
+    state.attempts[first.number] = []
 
 PUZZLES_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
@@ -50,8 +62,8 @@ def render() -> None:
             try:
                 puzzle = load_puzzle(path)
                 state = GameState(puzzle=puzzle)
-                # Révéler automatiquement le premier mot
-                state.answers[puzzle.words[0].number] = puzzle.words[0].answer
+                # Révéler automatiquement le premier mot (gratuit, sans pénalité)
+                _init_first_word(state, puzzle)
                 st.session_state.puzzle = puzzle
                 st.session_state.game_state = state
                 st.session_state.current_word_idx = 1

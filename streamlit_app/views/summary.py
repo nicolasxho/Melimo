@@ -21,9 +21,12 @@ def render() -> None:
         return
 
     total = len(puzzle.words)
+    # correct = mots trouvés par le joueur (sans révélation)
     correct = sum(1 for w in puzzle.words if state.is_word_correct(w.number))
     revealed_count = len(state.revealed)
-    pct = int(correct / total * 100) if total else 0
+    # answered = total des mots résolus (trouvés + révélés)
+    answered = correct + revealed_count
+    pct = int(answered / total * 100) if total else 0
     total_errors = sum(state.errors.values())
     total_hints = sum(state.hints.values())
 
@@ -35,7 +38,7 @@ def render() -> None:
     # ── Métriques globales ────────────────────────────────────────────────────
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Score", f"{state.score} pts")
-    m2.metric("Mots trouvés", f"{correct - revealed_count}/{total}")
+    m2.metric("Mots trouvés", f"{answered}/{total}")
     m3.metric("Réussite", f"{pct}%")
     m4.metric("Erreurs", str(total_errors))
     m5.metric("Indices", str(total_hints))
@@ -44,7 +47,7 @@ def render() -> None:
         st.balloons()
         st.success("🏆 Parfait ! Tous les mots trouvés sans aide !")
     elif pct == 100:
-        st.success(f"✅ Tous les mots trouvés ! ({revealed_count} révélé{'s' if revealed_count > 1 else ''})")
+        st.success(f"✅ Puzzle complété ! ({correct} trouvé{'s' if correct > 1 else ''}, {revealed_count} révélé{'s' if revealed_count > 1 else ''})")
     elif pct >= 70:
         st.info("👍 Bien joué !")
     else:

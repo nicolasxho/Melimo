@@ -211,7 +211,8 @@ def print_correct(
     if errors:
         parts.append(_red(f"✗ {errors} erreur{'s' if errors > 1 else ''} (-{errors * _scoring.ERROR_PENALTY} pts)"))
     if hints:
-        parts.append(_yellow(f"💡 {hints} indice{'s' if hints > 1 else ''} (-{hints * _scoring.HINT_PENALTY} pts)"))
+        hp = _scoring.hint_total_penalty(hints)
+        parts.append(_yellow(f"💡 {hints} indice{'s' if hints > 1 else ''} (-{hp} pts)"))
     print(f"  {' · '.join(parts)}")
     print()
 

@@ -9,8 +9,20 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from models import GameState
+from models import GameState, Puzzle
 from generator.grid_builder import generate_puzzle
+
+
+def _init_first_word(state: GameState, puzzle: Puzzle) -> None:
+    """Révèle le premier mot gratuitement et initialise ses compteurs."""
+    if not puzzle.words:
+        return
+    first = puzzle.words[0]
+    state.answers[first.number] = first.answer
+    state.word_elapsed[first.number] = 0.0
+    state.errors[first.number] = 0
+    state.hints[first.number] = 0
+    state.attempts[first.number] = []
 
 THEMES = ["general", "nature", "sport"]
 DIFFICULTIES = ["facile", "moyen", "difficile"]
@@ -62,7 +74,7 @@ def render() -> None:
                 st.stop()
 
         state = GameState(puzzle=puzzle)
-        state.answers[puzzle.words[0].number] = puzzle.words[0].answer
+        _init_first_word(state, puzzle)
         st.session_state.puzzle = puzzle
         st.session_state.game_state = state
         st.session_state.current_word_idx = 1

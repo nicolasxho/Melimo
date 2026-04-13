@@ -98,4 +98,8 @@ class GameState:
         return all(w.number in answered for w in self.puzzle.words)
 
     def answered_count(self) -> int:
-        return sum(1 for w in self.puzzle.words if self.is_word_correct(w.number))
+        """Compte les mots trouvés (correctement répondus OU révélés)."""
+        return sum(
+            1 for w in self.puzzle.words
+            if self.is_word_correct(w.number) or w.number in self.revealed
+        )
