@@ -15,7 +15,9 @@
       "mcp__playwright__browser_wait_for",
       "mcp__playwright__browser_evaluate",
       "Bash(.venv/Scripts/python dictionary/prefetch.py --stats)",
-      "Bash(.venv/Scripts/python melimo.py --help)"
+      "Bash(.venv/Scripts/python melimo.py --help)",
+      "Read(//tmp/**)",
+      "Read(//c/tmp/**)"
     ]
   },
   "mcpServers": {

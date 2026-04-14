@@ -25,9 +25,122 @@ FRENCH_LETTER_FREQ: dict[str, float] = {
 _LETTERS = list(FRENCH_LETTER_FREQ.keys())
 _WEIGHTS = [FRENCH_LETTER_FREQ[l] for l in _LETTERS]
 
+VOWELS: frozenset[str] = frozenset("AEIOUY")
+CONSONANTS: frozenset[str] = frozenset("BCDFGHJKLMNPQRSTVWXZ")
 
-def _random_letter() -> str:
-    return random.choices(_LETTERS, weights=_WEIGHTS, k=1)[0]
+# Règle e) du spec : lettres valides adjacentes à certaines consonnes déjà en place
+_CONSONANT_FOLLOW: dict[str, frozenset[str]] = {
+    "B": frozenset(["L", "R"]) | VOWELS,
+    "C": frozenset(["H", "L", "R"]) | VOWELS,
+    "D": frozenset(["R"]) | VOWELS,
+    "F": frozenset(["L", "R"]) | VOWELS,
+    "H": frozenset(["N", "L", "R"]) | VOWELS,
+    "P": frozenset(["H", "L", "R", "S"]) | VOWELS,
+    "Q": frozenset(["U"]),
+    "R": frozenset(["H"]) | VOWELS,
+    "S": frozenset(["T", "L", "P"]) | VOWELS,
+    "T": frozenset(["H", "R"]) | VOWELS,
+    "V": frozenset(["R"]) | VOWELS,
+}
+
+_TARGET_VOWEL_RATIO = 0.40
+
+
+def _choose_filler_letter(
+    grid: list[list[str]],
+    row: int,
+    col: int,
+    rows: int,
+    cols: int,
+    vowel_count: int,
+    total_count: int,
+) -> str:
+    """
+    Choisit une lettre de remplissage en respectant les règles du point 11 du spec :
+      a) Pas de lettre identique en diagonale.
+      c) Pas de schéma X_Y_X (même lettre à 2 pas H/V).
+      e) Règles de voisinage par consonne (B→L/R/voyelle, Q→U, etc.).
+      13) Pas de 2 consonnes adjacentes sauf ST.
+      d+12) Ratio cible 40 % voyelles / 60 % consonnes via pondération.
+    """
+    valid: set[str] = set(_LETTERS)
+
+    # Règle a : pas de lettre identique en diagonale
+    for dr, dc in ((-1, -1), (-1, 1), (1, -1), (1, 1)):
+        nr, nc = row + dr, col + dc
+        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc]:
+            valid.discard(grid[nr][nc])
+
+    # Règle c : pas de schéma X_Y_X (même lettre à 2 cases H/V)
+    for dr, dc in ((-2, 0), (2, 0), (0, -2), (0, 2)):
+        nr, nc = row + dr, col + dc
+        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc]:
+            valid.discard(grid[nr][nc])
+
+    # Règles e et 13 : contraintes selon les voisins H/V déjà posés
+    for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        nr, nc = row + dr, col + dc
+        if not (0 <= nr < rows and 0 <= nc < cols):
+            continue
+        neighbor = grid[nr][nc]
+        if not neighbor:
+            continue
+
+        # Règle e : si le voisin est une consonne avec règle spéciale
+        if neighbor in _CONSONANT_FOLLOW:
+            valid &= _CONSONANT_FOLLOW[neighbor]
+
+        # Règle 13 : pas de 2 consonnes adjacentes (sauf ST)
+        if neighbor in CONSONANTS:
+            if neighbor == "S":
+                valid -= CONSONANTS - {"T"}
+            elif neighbor == "T":
+                valid -= CONSONANTS - {"S"}
+            else:
+                valid -= CONSONANTS
+
+    # Fallback : si les contraintes s'annulent, on repart de l'alphabet complet
+    if not valid:
+        valid = set(_LETTERS)
+
+    # Règles d+12 : ratio cible 40 % voyelles — biais sur les poids
+    current_ratio = vowel_count / total_count if total_count > 0 else _TARGET_VOWEL_RATIO
+    vowel_bias = 2.0 if current_ratio < _TARGET_VOWEL_RATIO else 0.5
+
+    letters = list(valid)
+    weights = [
+        FRENCH_LETTER_FREQ.get(l, 1.0) * (vowel_bias if l in VOWELS else 1.0)
+        for l in letters
+    ]
+    return random.choices(letters, weights=weights, k=1)[0]
+
+
+def _fill_filler_cells(
+    grid: list[list[str]],
+    rows: int,
+    cols: int,
+    word_cells: set[Cell],
+) -> None:
+    """
+    Remplit toutes les cases non-mot (gauche→droite, haut→bas) en respectant
+    les règles de remplissage du spec (point 11).
+    """
+    # Initialiser les compteurs depuis les lettres de mots déjà posées
+    vowel_count = sum(
+        1 for cell in word_cells if grid[cell.row][cell.col] in VOWELS
+    )
+    total_count = len(word_cells)
+
+    for r in range(rows):
+        for c in range(cols):
+            if Cell(r, c) not in word_cells:
+                letter = _choose_filler_letter(
+                    grid, r, c, rows, cols, vowel_count, total_count
+                )
+                grid[r][c] = letter
+                if letter in VOWELS:
+                    vowel_count += 1
+                total_count += 1
 
 
 def build_puzzle(
@@ -55,11 +168,8 @@ def build_puzzle(
             "Réduire le nombre de mots ou augmenter la taille de la grille."
         )
 
-    # Initialiser la grille avec des lettres aléatoires
-    grid: list[list[str]] = [
-        [_random_letter() for _ in range(cols)]
-        for _ in range(rows)
-    ]
+    # Initialiser la grille vide (les cases seront remplies après placement des mots)
+    grid: list[list[str]] = [["" for _ in range(cols)] for _ in range(rows)]
 
     # Placer les mots sur le chemin
     word_entries: list[WordEntry] = []
@@ -91,10 +201,15 @@ def build_puzzle(
 
         path_index = end_idx
 
-    # Les cellules du chemin non utilisées (si total_letters < len(path))
-    # restent avec des lettres aléatoires — elles font partie des lettres inutilisées
-    path_set = set(path)
-    unused_count = rows * cols - len(path_set)
+    # Remplir toutes les cases non-mot avec les règles du spec (point 11)
+    word_cells: set[Cell] = {
+        path[i]
+        for entry in word_entries
+        for i in range(entry.start_index, entry.end_index)
+    }
+    _fill_filler_cells(grid, rows, cols, word_cells)
+
+    unused_count = rows * cols - len(set(path))
 
     return Puzzle(
         title=title,
